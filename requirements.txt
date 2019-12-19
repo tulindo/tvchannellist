@@ -1,0 +1,6 @@
+isort
+mypy
+pydocstyle
+pylint
+requests
+bs4
