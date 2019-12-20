@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """The Metronet IESS Online bridge."""
 
+import argparse
 import logging
 import json
 import requests
@@ -30,15 +31,54 @@ def set_logging(debug):
 
 
 def main():
-    cl = ChannelList("us", 10001)
+    """ChannelList main program."""
+    parser = argparse.ArgumentParser()
+    parser.add_argument("command")
+    parser.add_argument("--debug", default=False, help="Enable debug")
+    parser.add_argument("--country", help="Selected Country")
+    parser.add_argument("--zipcode", help="Selected ZipCode")
+    parser.add_argument("--provider", help="Selected Provider ID")
+    args = parser.parse_args()
+
+    set_logging(args.debug)
+
+    if not args.country:
+        _LOGGER.error("Missing Country")
+
+    cl = ChannelList()
+    cl.load_engine(args.country, args.zipcode)
+
     providers = cl.get_providers()
-    print(providers)
+
+    if args.command == "providers":
+        _LOGGER.info("Provider List:")
+        idx = 0
+        if providers:
+            for provider in providers:
+                _LOGGER.info("%d : %s", idx, provider)
+                idx = idx + 1
+        else:
+            _LOGGER.info("No Provider found for country %s", args.country)
+        exit(0)
+    else:
+        if not args.provider:
+            _LOGGER.error("Missing Provider")
+
     if providers:
-        cl.set_provider(providers[1])
+        cl.set_provider(providers[int(args.provider)])
+
     cl.load_channels()
-    print(cl.engine.lookup)
-    print(cl.get_channel("espn"))
-    print(cl.get_channel("wcbs", True))
+
+    if args.command == "channels":
+        _LOGGER.info("Channel List:")
+        idx = 0
+        for data in cl.engine.lookup:
+            _LOGGER.info("%d : %s", idx, data)
+            idx = idx + 1
+    else:
+        _LOGGER.info("Getting LCN of channel %s", args.command)
+        _LOGGER.info("Normal => %s", cl.get_channel(args.command))
+        _LOGGER.info("HD => %s", cl.get_channel(args.command, True))
 
 
 if __name__ == "__main__":

@@ -1,42 +1,47 @@
-import requests
-import json
-from .engine import Engine
+"""The TV Channel Engine Italy module."""
 from bs4 import BeautifulSoup
+import requests
+
+from ..engine import Engine
 
 
 class EngineIT(Engine):
-    def __init__(self, zipcode):
+    """The Channel Engine class for Italy."""
+
+    def __init__(self, zipcode=None):
+        """Init for data."""
         super().__init__(zipcode)
 
     def load_providers(self):
-        pass
+        """No provider defined."""
 
-    def format_channel_name(self, channel):
+    def normalize_channel_name(self, channel):
+        """Normalize channel name."""
         return channel.strip().replace(" ", "").lower()
 
     def load_channels(self):
-
+        """Load channels."""
         page = requests.get("https://www.dtti.it/lcn")
-        # page = requests.get("https://sites.google.com/site/litaliaindigitale/muxnazionali/listalcnnazionale")
 
         soup = BeautifulSoup(page.text, features="html.parser")
-        for div in soup.find_all("div", {"class": "content-inner"}):
-            for ul in div.findChildren("ul", recursive=True):
-                for li in ul.findChildren("li"):
-                    text = li.get_text().split(":")
+        for tag_div in soup.find_all("div", {"class": "content-inner"}):
+            for tag_ul in tag_div.findChildren("ul", recursive=True):
+                for tag_li in tag_ul.findChildren("li"):
+                    text = tag_li.get_text().split(":")
                     if len(text) == 2 and text[0].isdigit():
                         lcn = int(text[0])
                         name = text[1]
                         if "(" in name:
                             name = name[: name.find("(")]
-                        name = self.format_channel_name(name)
-                        hd = False
+                        name = self.normalize_channel_name(name)
+                        is_hd = False
                         if name[-2:] == "hd":
                             name = name[:-2]
-                            hd = True
-                        hd = lcn > 9 and (hd or (lcn > 500 and lcn < 510))
+                            is_hd = True
 
-                        super().add_channel_mapping(name, hd, lcn)
+                        is_hd = lcn > 9 and (is_hd or (500 < lcn < 510))
+
+                        super().add_channel_mapping(name, is_hd, lcn)
 
     #   for div in soup.find_all("div", { "class" : "sites-canvas-main"}):
     #     for table in div.findChildren("table", recursive=True):

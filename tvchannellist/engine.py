@@ -1,12 +1,7 @@
 """The TV Channel List module."""
-from abc import ABC, abstractmethod
 import logging
-import re
-import time
-import requests
-import difflib
 
-# import sslkeylog
+from abc import ABC, abstractmethod
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -28,20 +23,20 @@ class Engine(ABC):
 
     @abstractmethod
     def load_channels(self):
-        pass
+        """Load channels from selected provider."""
 
     @abstractmethod
     def load_providers(self):
-        pass
+        """Load Provider list."""
 
-    def add_channel_mapping(self, name, hd, lcn):
+    def add_channel_mapping(self, name, is_hd, lcn):
         """Add a new Mapping to the lookup list.
 
         name: the name of the channel
         hd: True if the channel is HD
         lcn: the Logical Channel Name of the channel.
         """
-        if hd:
+        if is_hd:
             if name not in self.lookup:
                 self.lookup[name] = [None, lcn]
             else:
@@ -55,16 +50,5 @@ class Engine(ABC):
                     self.lookup[name][0] = lcn
 
     @abstractmethod
-    def format_channel_name(self, channel):
-        pass
-
-    # def GetChannel(self, channel):
-    #     if channel:
-    #         _LOGGER.debug("Requesting Match for channel: %s", channel)
-    #         tmp = channel.lower().replace(" ",'')
-    #         result = difflib.get_close_matches(self.FormatChannelName(channel), lookup.keys())
-    #         number = lookup[result[0]]
-    #         _LOGGER.debug("Got channel number %d", number)
-    #         return number
-
-    #     return None
+    def normalize_channel_name(self, channel):
+        """Normalize channel name."""
