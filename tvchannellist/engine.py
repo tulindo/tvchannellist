@@ -1,7 +1,6 @@
 """The TV Channel List module."""
-import logging
-
 from abc import ABC, abstractmethod
+import logging
 
 _LOGGER = logging.getLogger(__name__)
 

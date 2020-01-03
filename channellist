@@ -3,11 +3,8 @@
 
 import argparse
 import logging
-import json
-import requests
-import re
-from bs4 import BeautifulSoup
-import difflib
+import sys
+
 from tvchannellist import ChannelList
 
 _LOGGER = logging.getLogger()
@@ -32,8 +29,15 @@ def set_logging(debug):
 
 def main():
     """ChannelList main program."""
-    parser = argparse.ArgumentParser()
-    parser.add_argument("command")
+    parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
+    parser.add_argument(
+        "command",
+        help="""Supported commands:
+* providers       --> Get Provider channel_list
+* channels        --> Get Channel channel_list
+* <ChannelName>   --> Get LCN of input channel
+""",
+    )
     parser.add_argument("--debug", default=False, help="Enable debug")
     parser.add_argument("--country", help="Selected Country")
     parser.add_argument("--zipcode", help="Selected ZipCode")
@@ -45,13 +49,13 @@ def main():
     if not args.country:
         _LOGGER.error("Missing Country")
 
-    cl = ChannelList()
-    cl.load_engine(args.country, args.zipcode)
+    channel_list = ChannelList()
+    channel_list.load_engine(args.country, args.zipcode)
 
-    providers = cl.get_providers()
+    providers = channel_list.get_providers()
 
     if args.command == "providers":
-        _LOGGER.info("Provider List:")
+        _LOGGER.info("Provider channel_list:")
         idx = 0
         if providers:
             for provider in providers:
@@ -59,26 +63,26 @@ def main():
                 idx = idx + 1
         else:
             _LOGGER.info("No Provider found for country %s", args.country)
-        exit(0)
+        sys.exit(0)
     else:
         if not args.provider:
             _LOGGER.error("Missing Provider")
 
     if providers:
-        cl.set_provider(providers[int(args.provider)])
+        channel_list.set_provider(providers[int(args.provider)])
 
-    cl.load_channels()
+    channel_list.load_channels()
 
     if args.command == "channels":
-        _LOGGER.info("Channel List:")
+        _LOGGER.info("Channel channel_list:")
         idx = 0
-        for data in cl.engine.lookup:
+        for data in channel_list.engine.lookup:
             _LOGGER.info("%d : %s", idx, data)
             idx = idx + 1
     else:
         _LOGGER.info("Getting LCN of channel %s", args.command)
-        _LOGGER.info("Normal => %s", cl.get_channel(args.command))
-        _LOGGER.info("HD => %s", cl.get_channel(args.command, True))
+        _LOGGER.info("Normal => %d", channel_list.get_channel(args.command))
+        _LOGGER.info("HD => %d", channel_list.get_channel(args.command, True))
 
 
 if __name__ == "__main__":

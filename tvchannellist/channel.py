@@ -1,7 +1,7 @@
 """The TV Channel List module."""
-import logging
 import difflib
 import importlib
+import logging
 import os
 
 from .engine import Engine

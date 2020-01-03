@@ -15,15 +15,19 @@ init:
 	pip3 install pip pipenv
 	pipenv lock
 	pipenv install --three --dev
-lint: flake8 docstyle pylint typing
+lint: flake8 docstyle pylint typing isort black
 flake8:
-	pipenv run flake8 tvchannellist
+	pipenv run flake8 tvchannellist channellist
 docstyle:
-	pipenv run pydocstyle tvchannellist
+	pipenv run pydocstyle tvchannellist channellist
 pylint:
-	pipenv run pylint tvchannellist
+	pipenv run pylint tvchannellist channellist
+isort:
+	pipenv run isort tvchannellist/*py channellist
+black:
+	pipenv run black tvchannellist/*py channellist
 typing:
-	pipenv run mypy --ignore-missing-imports tvchannellist
+	pipenv run mypy --ignore-missing-imports tvchannellist channellist
 publish:
 	pipenv run python setup.py sdist bdist_wheel
 	pipenv run twine upload dist/*

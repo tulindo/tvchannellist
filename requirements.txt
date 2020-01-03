@@ -2,5 +2,7 @@ isort
 mypy
 pydocstyle
 pylint
+flake8
+black
 requests
 bs4
