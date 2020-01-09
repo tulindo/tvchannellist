@@ -12,8 +12,7 @@ setuptools.setup(
     version=VERSION["__version__"],
     author="Paolo Tuninetto",
     author_email="paolo.tuninetto@gmail.com",
-    description="Python Package for programmatically controlling Security and "
-    + "Intrusion systems made by IESS",
+    description="Python Package for programmatically retrieving LCN of television channels.",
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
     url="https://github.com/tulindo/tvchannellist",
