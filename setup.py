@@ -26,5 +26,5 @@ setuptools.setup(
     ],
     python_requires=">=3.7",
     install_requires=["requests"],
-    scripts=["metronet"],
+    scripts=["channellist"],
 )
