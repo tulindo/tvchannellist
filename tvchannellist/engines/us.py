@@ -20,16 +20,17 @@ class EngineUS(Engine):
             "https://mobilelistings.tvguide.com/Listingsweb/ws/rest/serviceproviders/zipcode/"
             + f"{self.zipcode}?formattype=json"
         )
-        for provider in json.loads(page.text):
-            for device in provider["Devices"]:
-                self.providers.append(
-                    (
-                        str(provider["Id"]) + "." + str(device["DeviceFlag"]),
-                        provider["Name"],
-                        device["DeviceName"],
-                        provider["Type"],
+        if page.status_code == 200:
+            for provider in json.loads(page.text):
+                for device in provider["Devices"]:
+                    self.providers.append(
+                        (
+                            str(provider["Id"]) + "." + str(device["DeviceFlag"]),
+                            provider["Name"],
+                            device["DeviceName"],
+                            provider["Type"],
+                        )
                     )
-                )
 
     def normalize_channel_name(self, channel):
         """Normalize channel name."""
@@ -51,25 +52,26 @@ class EngineUS(Engine):
             + "start/0/duration/1?ChannelFields=Name,FullName,Number&formattype=json&"
             + "disableChannels=music,ppv,24hr&ScheduleFields=ProgramId"
         )
-        for channel in json.loads(response.text):
-            full = self.normalize_channel_name(channel["Channel"]["FullName"])
+        if response.status_code == 200:
+            for channel in json.loads(response.text):
+                full = self.normalize_channel_name(channel["Channel"]["FullName"])
 
-            name = channel["Channel"]["Name"].lower()
-            pattern = re.compile(r"([^\s\w]|_)+")
-            name = pattern.sub("", name)
-            num = int(channel["Channel"]["Number"])
+                name = channel["Channel"]["Name"].lower()
+                pattern = re.compile(r"([^\s\w]|_)+")
+                name = pattern.sub("", name)
+                num = int(channel["Channel"]["Number"])
 
-            is_hd = False
-            if " hdtv" in full or " hd" in full:
-                is_hd = True
-                full = full.replace(" hdtv", "")
-                full = full.replace(" hd", "")
+                is_hd = False
+                if " hdtv" in full or " hd" in full:
+                    is_hd = True
+                    full = full.replace(" hdtv", "")
+                    full = full.replace(" hd", "")
 
-                if name.endswith("hd"):
-                    name = name[:-2]
-                elif name.endswith("d"):
-                    name = name[:-1]
-                name = name.strip()
+                    if name.endswith("hd"):
+                        name = name[:-2]
+                    elif name.endswith("d"):
+                        name = name[:-1]
+                    name = name.strip()
 
-            super().add_channel_mapping(name, is_hd, num)
-            super().add_channel_mapping(full, is_hd, num)
+                super().add_channel_mapping(name, is_hd, num)
+                super().add_channel_mapping(full, is_hd, num)
