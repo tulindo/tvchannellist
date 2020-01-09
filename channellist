@@ -69,6 +69,7 @@ def main():
     else:
         if not args.provider:
             _LOGGER.error("Missing Provider")
+            sys.exit(0)
 
     if providers:
         channel_list.set_provider(providers[int(args.provider)])
@@ -83,8 +84,8 @@ def main():
             idx = idx + 1
     else:
         _LOGGER.info("Getting LCN of channel %s", args.command)
-        _LOGGER.info("Normal => %d", channel_list.get_channel(args.command))
-        _LOGGER.info("HD => %d", channel_list.get_channel(args.command, True))
+        _LOGGER.info("Normal => %s", channel_list.get_channel(args.command))
+        _LOGGER.info("HD => %s", channel_list.get_channel(args.command, True))
 
 
 if __name__ == "__main__":

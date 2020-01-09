@@ -1,27 +1,38 @@
 """The TV Channel Engine Unites States module."""
 import json
 import re
+from requests.exceptions import RequestException
 import requests
 
 from ..engine import Engine
+
+
+def _load_response(url):
+    try:
+        page = requests.get(url)
+        if page.status_code == 200:
+            return json.loads(page.text)
+    except (RequestException, json.JSONDecodeError):
+        return None
+    return None
 
 
 class EngineUS(Engine):
     """The Channel Engine class for United States."""
 
     def __init__(self, zipcode):
-        """Init for data."""
+        """Init for response."""
         super().__init__(zipcode)
         self.provider = []
 
     def load_providers(self):
         """Load Provider list."""
-        page = requests.get(
+        response = _load_response(
             "https://mobilelistings.tvguide.com/Listingsweb/ws/rest/serviceproviders/zipcode/"
             + f"{self.zipcode}?formattype=json"
         )
-        if page.status_code == 200:
-            for provider in json.loads(page.text):
+        if response:
+            for provider in response:
                 for device in provider["Devices"]:
                     self.providers.append(
                         (
@@ -47,13 +58,13 @@ class EngineUS(Engine):
     def load_channels(self):
         """Load channels from selected provider."""
         idx = self.provider[0]
-        response = requests.get(
+        response = _load_response(
             f"http://mobilelistings.tvguide.com/Listingsweb/ws/rest/schedules/{idx}/"
             + "start/0/duration/1?ChannelFields=Name,FullName,Number&formattype=json&"
             + "disableChannels=music,ppv,24hr&ScheduleFields=ProgramId"
         )
-        if response.status_code == 200:
-            for channel in json.loads(response.text):
+        if response:
+            for channel in response:
                 full = self.normalize_channel_name(channel["Channel"]["FullName"])
 
                 name = channel["Channel"]["Name"].lower()
