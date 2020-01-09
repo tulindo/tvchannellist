@@ -7,14 +7,14 @@ working at any time without warning.
 
 # Credits
 Originally inspired by [AlexaControlledSamsungTV](https://github.com/eclair4151/AlexaControlledSamsungTV) 
-Additional scaffolding from [alexapy](https://gitlab.com/keatontaylor/alexapy)
+Additional scaffolding from [alexapy](https://gitlab.com/keatontaylor/alexapy) and [simplisafe-python](https://github.com/bachya/simplisafe-python)
 
 # Contributing
 1.  [Check for open features/bugs](https://github.com/tulindo/tvchannellist/issues)
   or [initiate a discussion on one](https://github.com/tulindo/tvchannellist/issues/new).
 2.  Fork the repository.
-3.  Install the dev environment: `make init`.
-4.  Enter the virtual environment: `pipenv shell`
+3.  Install the dev environment: `python3 -m venv venv`.
+4.  Enter the virtual environment: `source venv/bin/activate`
 5.  Install requirements: `pip3 install -r requirements.txt`
 6.  Code your new feature or bug fix.
 7.  Write a test that covers your new functionality.

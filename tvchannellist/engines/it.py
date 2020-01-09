@@ -28,22 +28,23 @@ class EngineIT(Engine):
                 soup = BeautifulSoup(page.text, features="html.parser")
         except RequestException:
             return
-        if soup:
-            for tag_div in soup.find_all("div", {"class": "content-inner"}):
-                for tag_ul in tag_div.findChildren("ul", recursive=True):
-                    for tag_li in tag_ul.findChildren("li"):
-                        text = tag_li.get_text().split(":")
-                        if len(text) == 2 and text[0].isdigit():
-                            lcn = int(text[0])
-                            name = text[1]
-                            if "(" in name:
-                                name = name[: name.find("(")]
-                            name = self.normalize_channel_name(name)
-                            is_hd = False
-                            if name[-2:] == "hd":
-                                name = name[:-2]
-                                is_hd = True
+        if soup is None:
+            return
+        for tag_div in soup.find_all("div", {"class": "content-inner"}):
+            for tag_ul in tag_div.findChildren("ul", recursive=True):
+                for tag_li in tag_ul.findChildren("li"):
+                    text = tag_li.get_text().split(":")
+                    if len(text) == 2 and text[0].isdigit():
+                        lcn = int(text[0])
+                        name = text[1]
+                        if "(" in name:
+                            name = name[: name.find("(")]
+                        name = self.normalize_channel_name(name)
+                        is_hd = False
+                        if name[-2:] == "hd":
+                            name = name[:-2]
+                            is_hd = True
 
-                            is_hd = lcn > 9 and (is_hd or (500 < lcn < 510))
+                        is_hd = lcn > 9 and (is_hd or (500 < lcn < 510))
 
-                            super().add_channel_mapping(name, is_hd, lcn)
+                        super().add_channel_mapping(name, is_hd, lcn)
