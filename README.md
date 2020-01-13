@@ -6,7 +6,8 @@ Python Package for programmatically retrieving the LCN of television channels. T
 working at any time without warning.
 
 # Credits
-Originally inspired by [AlexaControlledSamsungTV](https://github.com/eclair4151/AlexaControlledSamsungTV) 
+Originally inspired by [AlexaControlledSamsungTV](https://github.com/eclair4151/AlexaControlledSamsungTV).
+
 Additional scaffolding from [alexapy](https://gitlab.com/keatontaylor/alexapy) and [simplisafe-python](https://github.com/bachya/simplisafe-python)
 
 # Contributing
