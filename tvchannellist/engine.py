@@ -18,6 +18,7 @@ class Engine(ABC):
         self.zipcode = zipcode
         self.providers = []
         self.provider = None
+        self.requires_provider = True
         super().__init__()
 
     @abstractmethod

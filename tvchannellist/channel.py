@@ -36,12 +36,19 @@ class ChannelList:
 
     def get_providers(self):
         """Get provider list."""
-        self.engine.load_providers()
-        return self.engine.providers
+        if self.engine.requires_provider:
+            self.engine.load_providers()
+            return self.engine.providers
+        return None
 
     def set_provider(self, provider):
         """Set current channel provider."""
-        self.engine.provider = provider
+        if self.engine.requires_provider:
+            self.engine.provider = provider
+
+    def is_provider_required(self):
+        """Get if the engine requires provider."""
+        return self.engine.requires_provider
 
     def get_channel(self, channel, prefer_hd=False):
         """Get channel's LCN."""
@@ -64,3 +71,9 @@ class ChannelList:
                     _LOGGER.debug("Got channel number %d", number)
                     return number
         return None
+
+    def override_channel(self, name, lcn):
+        """Add a manual channel."""
+        normalized = self.engine.normalize_channel_name(name)
+        self.engine.add_channel_mapping(normalized, False, lcn)
+        self.engine.add_channel_mapping(normalized, True, lcn)

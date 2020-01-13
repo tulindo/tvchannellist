@@ -12,6 +12,7 @@ class EngineIT(Engine):
     def __init__(self, zipcode=None):
         """Init for data."""
         super().__init__(zipcode)
+        self.requires_provider = False
 
     def load_providers(self):
         """No provider defined."""
