@@ -43,7 +43,7 @@ async def main():
     parser.add_argument("--debug", default=False, help="Enable debug")
     parser.add_argument("--country", default="fi", help="Selected Country")
     parser.add_argument("--zipcode", help="Selected ZipCode")
-    parser.add_argument("--provider", default="1", help="Selected Provider ID")
+    parser.add_argument("--provider", default="0", help="Selected Provider ID")
     parser.add_argument("--override", help="Channel override option (name:lcn)")
     args = parser.parse_args()
 

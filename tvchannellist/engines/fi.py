@@ -5,7 +5,6 @@ from enum import Enum
 import re
 
 from bs4 import BeautifulSoup
-import aiohttp
 
 from ..engine import Engine
 
@@ -53,17 +52,13 @@ class EngineFI(Engine):
 
     async def _load_channels_digita(self, session):
         """Load Digita channels."""
-        try:
-            page = await session.request(
-                method="GET",
-                url="https://www.digita.fi/kuluttajille/tv/"
-                + "tv_ohjeet_ja_tietopankki/kanavajarjestys",
-            )
-            page.raise_for_status()
-            text = await page.text()
+        text = await Engine.get_response(
+            "https://www.digita.fi/kuluttajille/tv/"
+            + "tv_ohjeet_ja_tietopankki/kanavajarjestys",
+            session,
+        )
+        if text:
             soup = BeautifulSoup(text, features="html.parser")
-        except (aiohttp.ClientError, aiohttp.http_exceptions.HttpProcessingError):
-            return
         if soup is None:
             return
         for tag_table in soup.find_all("table", {"class": "p4table"}):
@@ -79,18 +74,11 @@ class EngineFI(Engine):
 
     async def _load_channels_dna_welho(self, session):
         """Load DNA Welho channels."""
-        try:
-            page = await session.request(
-                method="GET", url="http://dvb.welho.fi/excel.php"
-            )
-            page.raise_for_status()
-            resp = await page.content.read()
-            resp.encoding = "utf-8"  # not in Content-Type, requests misdetects
-            reader = DictReader(resp.iter_lines(decode_unicode=True), delimiter=";")
+        page = await Engine.get_response("http://dvb.welho.fi/excel.php", session)
+        if page:
+            reader = DictReader(page.splitlines(), delimiter=";")
             for row in reader:
                 name = self.normalize_channel_name(row["Kanava"])
                 lcn = row["MP"]
                 name, is_hd = self._check_hd(name)
                 self.add_channel_mapping(name, is_hd, lcn)
-        except (aiohttp.ClientError, aiohttp.http_exceptions.HttpProcessingError):
-            pass
