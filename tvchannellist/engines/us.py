@@ -1,7 +1,6 @@
 """The TV Channel Engine Unites States module."""
 import json
 import re
-import aiohttp
 
 from ..engine import Engine
 
