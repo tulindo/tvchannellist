@@ -4,7 +4,7 @@ pydocstyle
 pylint
 flake8
 black
-requests
 bs4
 twine
 wheel
+aiohttp

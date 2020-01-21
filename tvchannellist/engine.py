@@ -2,6 +2,8 @@
 from abc import ABC, abstractmethod
 import logging
 
+import aiohttp
+
 _LOGGER = logging.getLogger(__name__)
 
 
@@ -21,12 +23,23 @@ class Engine(ABC):
         self.requires_provider = True
         super().__init__()
 
+    @staticmethod
+    async def get_response(url, session):
+        """Get page text."""
+        try:
+            page = await session.request(method="GET", url=url)
+            page.raise_for_status()
+            return await page.text()
+        except (aiohttp.ClientError, aiohttp.http_exceptions.HttpProcessingError):
+            return None
+        return None
+
     @abstractmethod
-    def load_channels(self):
+    async def load_channels(self, session):
         """Load channels from selected provider."""
 
     @abstractmethod
-    def load_providers(self):
+    async def load_providers(self, session):
         """Load Provider list."""
 
     def add_channel_mapping(self, name, is_hd, lcn):
