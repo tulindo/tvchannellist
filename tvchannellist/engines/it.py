@@ -1,7 +1,5 @@
 """The TV Channel Engine Italy module."""
 from bs4 import BeautifulSoup
-from requests.exceptions import RequestException
-import requests
 
 from ..engine import Engine
 
@@ -14,21 +12,18 @@ class EngineIT(Engine):
         super().__init__(zipcode)
         self.requires_provider = False
 
-    def load_providers(self):
+    async def load_providers(self, session):
         """No provider defined."""
 
     def normalize_channel_name(self, channel):
         """Normalize channel name."""
         return channel.strip().replace(" ", "").lower()
 
-    def load_channels(self):
+    async def load_channels(self, session):
         """Load channels."""
-        try:
-            page = requests.get("https://www.dtti.it/lcn")
-            if page.status_code == 200:
-                soup = BeautifulSoup(page.text, features="html.parser")
-        except RequestException:
-            return
+        text = await Engine.get_response("https://www.dtti.it/lcn", session)
+        if text:
+            soup = BeautifulSoup(text, features="html.parser")
         if soup is None:
             return
         for tag_div in soup.find_all("div", {"class": "content-inner"}):

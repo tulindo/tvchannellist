@@ -4,6 +4,8 @@ import importlib
 import logging
 import os
 
+from aiohttp import ClientSession
+
 from .engine import Engine
 
 _LOGGER = logging.getLogger(__name__)
@@ -30,14 +32,16 @@ class ChannelList:
                 class_ = getattr(module, cls.__name__)
                 self.engine = class_(zipcode)
 
-    def load_channels(self):
+    async def load_channels(self):
         """Load channels."""
-        self.engine.load_channels()
+        async with ClientSession() as session:
+            await self.engine.load_channels(session)
 
-    def get_providers(self):
+    async def get_providers(self):
         """Get provider list."""
         if self.engine.requires_provider:
-            self.engine.load_providers()
+            async with ClientSession() as session:
+                await self.engine.load_providers(session)
             return self.engine.providers
         return None
 

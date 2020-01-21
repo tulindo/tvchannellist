@@ -5,7 +5,7 @@ from enum import Enum
 import re
 
 from bs4 import BeautifulSoup
-import requests
+import aiohttp
 
 from ..engine import Engine
 
@@ -25,7 +25,7 @@ class EngineFI(Engine):
         """Init for data."""
         super().__init__(zipcode)
 
-    def load_providers(self):
+    async def load_providers(self, session):
         """Load providers."""
         for provider in _Provider:
             self.providers.append(provider.value)
@@ -36,12 +36,12 @@ class EngineFI(Engine):
             r"\W+", "", channel.replace(" channel", "").replace("&", "ja")
         ).lower()
 
-    def load_channels(self):
+    async def load_channels(self, session):
         """Load channels."""
         if self.provider == _Provider.DIGITA.value:
-            self._load_channels_digita()
+            await self._load_channels_digita(session)
         elif self.provider == _Provider.DNA_WELHO.value:
-            self._load_channels_dna_welho()
+            await self._load_channels_dna_welho(session)
 
     @staticmethod
     def _check_hd(name):
@@ -51,15 +51,18 @@ class EngineFI(Engine):
             is_hd = True
         return (name, is_hd)
 
-    def _load_channels_digita(self):
+    async def _load_channels_digita(self, session):
         """Load Digita channels."""
         try:
-            page = requests.get(
-                "https://www.digita.fi/kuluttajille/tv/tv_ohjeet_ja_tietopankki/kanavajarjestys"
+            page = await session.request(
+                method="GET",
+                url="https://www.digita.fi/kuluttajille/tv/"
+                + "tv_ohjeet_ja_tietopankki/kanavajarjestys",
             )
-            if page.status_code == 200:
-                soup = BeautifulSoup(page.text, features="html.parser")
-        except requests.exceptions.RequestException:
+            page.raise_for_status()
+            text = await page.text()
+            soup = BeautifulSoup(text, features="html.parser")
+        except (aiohttp.ClientError, aiohttp.http_exceptions.HttpProcessingError):
             return
         if soup is None:
             return
@@ -74,21 +77,20 @@ class EngineFI(Engine):
                 name, is_hd = self._check_hd(name)
                 self.add_channel_mapping(name, is_hd, lcn)
 
-    def _load_channels_dna_welho(self):
+    async def _load_channels_dna_welho(self, session):
         """Load DNA Welho channels."""
         try:
-            with requests.get("http://dvb.welho.fi/excel.php", stream=True) as resp:
-                if resp.status_code == 200:
-                    resp.encoding = "utf-8"  # not in Content-Type, requests misdetects
-                    reader = DictReader(
-                        resp.iter_lines(decode_unicode=True), delimiter=";"
-                    )
-                else:
-                    return
-                for row in reader:
-                    name = self.normalize_channel_name(row["Kanava"])
-                    lcn = row["MP"]
-                    name, is_hd = self._check_hd(name)
-                    self.add_channel_mapping(name, is_hd, lcn)
-        except requests.exceptions.RequestException:
+            page = await session.request(
+                method="GET", url="http://dvb.welho.fi/excel.php"
+            )
+            page.raise_for_status()
+            resp = await page.content.read()
+            resp.encoding = "utf-8"  # not in Content-Type, requests misdetects
+            reader = DictReader(resp.iter_lines(decode_unicode=True), delimiter=";")
+            for row in reader:
+                name = self.normalize_channel_name(row["Kanava"])
+                lcn = row["MP"]
+                name, is_hd = self._check_hd(name)
+                self.add_channel_mapping(name, is_hd, lcn)
+        except (aiohttp.ClientError, aiohttp.http_exceptions.HttpProcessingError):
             pass

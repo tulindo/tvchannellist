@@ -2,6 +2,7 @@
 """The TV Channel List module."""
 
 import argparse
+import asyncio
 import logging
 import sys
 
@@ -10,7 +11,7 @@ from tvchannellist import ChannelList
 _LOGGER = logging.getLogger()
 
 
-def set_logging(debug):
+def set_logging(debug: bool):
     """Set logging."""
     level = logging.INFO
     if debug:
@@ -27,11 +28,12 @@ def set_logging(debug):
     _LOGGER.setLevel(logging.DEBUG)
 
 
-def main():
+async def main():
     """ChannelList main program."""
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument(
-        "command",
+        "--command",
+        default="channels",
         help="""Supported commands:
 * providers       --> Get Provider channel_list
 * channels        --> Get Channel channel_list
@@ -39,9 +41,9 @@ def main():
 """,
     )
     parser.add_argument("--debug", default=False, help="Enable debug")
-    parser.add_argument("--country", help="Selected Country")
+    parser.add_argument("--country", default="fi", help="Selected Country")
     parser.add_argument("--zipcode", help="Selected ZipCode")
-    parser.add_argument("--provider", help="Selected Provider ID")
+    parser.add_argument("--provider", default="1", help="Selected Provider ID")
     parser.add_argument("--override", help="Channel override option (name:lcn)")
     args = parser.parse_args()
 
@@ -54,7 +56,7 @@ def main():
     channel_list = ChannelList()
     channel_list.load_engine(args.country, args.zipcode)
 
-    providers = channel_list.get_providers()
+    providers = await channel_list.get_providers()
 
     if args.command == "providers":
         _LOGGER.info("Provider channel_list:")
@@ -80,7 +82,7 @@ def main():
         split = args.override.split(":", 2)
         channel_list.override_channel(split[0], int(split[1]))
 
-    channel_list.load_channels()
+    await channel_list.load_channels()
 
     if args.command == "channels":
         _LOGGER.info("Channel channel_list:")
@@ -95,4 +97,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
