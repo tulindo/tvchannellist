@@ -66,8 +66,9 @@ async def main():
                 idx = idx + 1
         else:
             _LOGGER.info(
-                "No Provider found for country %s zip: %s", args.country, args.zipcode
+                "No Provider found for country %s zip: %s", args.country, args.zipcode,
             )
+        await channel_list.close_session()
         sys.exit(0)
     else:
         if not args.provider and channel_list.is_provider_required():
@@ -93,6 +94,8 @@ async def main():
         _LOGGER.info("Getting LCN of channel %s", args.command)
         _LOGGER.info("Normal => %s", channel_list.get_channel(args.command))
         _LOGGER.info("HD => %s", channel_list.get_channel(args.command, True))
+
+    await channel_list.close_session()
 
 
 if __name__ == "__main__":
