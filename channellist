@@ -2,6 +2,7 @@
 """The TV Channel List module."""
 
 import argparse
+import asyncio
 import logging
 import sys
 
@@ -10,7 +11,7 @@ from tvchannellist import ChannelList
 _LOGGER = logging.getLogger()
 
 
-def set_logging(debug):
+def set_logging(debug: bool):
     """Set logging."""
     level = logging.INFO
     if debug:
@@ -27,7 +28,7 @@ def set_logging(debug):
     _LOGGER.setLevel(logging.DEBUG)
 
 
-def main():
+async def main():
     """ChannelList main program."""
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument(
@@ -54,7 +55,7 @@ def main():
     channel_list = ChannelList()
     channel_list.load_engine(args.country, args.zipcode)
 
-    providers = channel_list.get_providers()
+    providers = await channel_list.get_providers()
 
     if args.command == "providers":
         _LOGGER.info("Provider channel_list:")
@@ -65,8 +66,9 @@ def main():
                 idx = idx + 1
         else:
             _LOGGER.info(
-                "No Provider found for country %s zip: %s", args.country, args.zipcode
+                "No Provider found for country %s zip: %s", args.country, args.zipcode,
             )
+        await channel_list.close_session()
         sys.exit(0)
     else:
         if not args.provider and channel_list.is_provider_required():
@@ -80,7 +82,7 @@ def main():
         split = args.override.split(":", 2)
         channel_list.override_channel(split[0], int(split[1]))
 
-    channel_list.load_channels()
+    await channel_list.load_channels()
 
     if args.command == "channels":
         _LOGGER.info("Channel channel_list:")
@@ -93,6 +95,8 @@ def main():
         _LOGGER.info("Normal => %s", channel_list.get_channel(args.command))
         _LOGGER.info("HD => %s", channel_list.get_channel(args.command, True))
 
+    await channel_list.close_session()
+
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

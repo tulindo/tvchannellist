@@ -4,6 +4,8 @@ import importlib
 import logging
 import os
 
+from aiohttp import ClientSession
+
 from .engine import Engine
 
 _LOGGER = logging.getLogger(__name__)
@@ -15,9 +17,13 @@ class ChannelList:
     The class is the public interface exposed to client.
     """
 
-    def __init__(self):
+    def __init__(self, session=None):
         """Init for data."""
         self.engine = None
+        if session:
+            self.session = session
+        else:
+            self.session = ClientSession()
 
     def load_engine(self, country, zipcode=None):
         """Load channel engine."""
@@ -30,14 +36,14 @@ class ChannelList:
                 class_ = getattr(module, cls.__name__)
                 self.engine = class_(zipcode)
 
-    def load_channels(self):
+    async def load_channels(self):
         """Load channels."""
-        self.engine.load_channels()
+        await self.engine.load_channels(self.session)
 
-    def get_providers(self):
+    async def get_providers(self):
         """Get provider list."""
         if self.engine.requires_provider:
-            self.engine.load_providers()
+            await self.engine.load_providers(self.session)
             return self.engine.providers
         return None
 
@@ -71,6 +77,11 @@ class ChannelList:
                     _LOGGER.debug("Got channel number %d", number)
                     return number
         return None
+
+    async def close_session(self):
+        """Close aiohttp session."""
+        if self.session and not self.session.closed:
+            await self.session.close()
 
     def override_channel(self, name, lcn):
         """Add a manual channel."""

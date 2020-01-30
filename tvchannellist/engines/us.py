@@ -1,18 +1,16 @@
 """The TV Channel Engine Unites States module."""
 import json
 import re
-from requests.exceptions import RequestException
-import requests
 
 from ..engine import Engine
 
 
-def _load_response(url):
+async def _load_response(url, session):
     try:
-        page = requests.get(url)
-        if page.status_code == 200:
-            return json.loads(page.text)
-    except (RequestException, json.JSONDecodeError):
+        page = await Engine.get_response(url, session)
+        if page:
+            return json.loads(page)
+    except json.JSONDecodeError:
         return None
     return None
 
@@ -25,11 +23,12 @@ class EngineUS(Engine):
         super().__init__(zipcode)
         self.provider = []
 
-    def load_providers(self):
+    async def load_providers(self, session):
         """Load Provider list."""
-        response = _load_response(
+        response = await _load_response(
             "https://mobilelistings.tvguide.com/Listingsweb/ws/rest/serviceproviders/zipcode/"
-            + f"{self.zipcode}?formattype=json"
+            + f"{self.zipcode}?formattype=json",
+            session,
         )
         if response:
             for provider in response:
@@ -55,13 +54,14 @@ class EngineUS(Engine):
         channel = pattern.sub("", channel).strip()
         return channel
 
-    def load_channels(self):
+    async def load_channels(self, session):
         """Load channels from selected provider."""
         idx = self.provider[0]
-        response = _load_response(
+        response = await _load_response(
             f"http://mobilelistings.tvguide.com/Listingsweb/ws/rest/schedules/{idx}/"
             + "start/0/duration/1?ChannelFields=Name,FullName,Number&formattype=json&"
-            + "disableChannels=music,ppv,24hr&ScheduleFields=ProgramId"
+            + "disableChannels=music,ppv,24hr&ScheduleFields=ProgramId",
+            session,
         )
         if response:
             for channel in response:

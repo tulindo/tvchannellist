@@ -6,3 +6,5 @@
 * US: [Paolo Tuninetto](https://github.com/tulindo)
 * Finland: [Ville Skyttä](https://github.com/scop)
 
+# Special Thanks to
+* [Martin Hjelmare](https://github.com/MartinHjelmare)
