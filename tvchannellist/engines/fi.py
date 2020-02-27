@@ -61,7 +61,7 @@ class EngineFI(Engine):
             soup = BeautifulSoup(text, features="html.parser")
         if soup is None:
             return
-        for tag_table in soup.find_all("table", {"class": "p4table"}):
+        for tag_table in soup.find_all("table", {"class": ""}):
             for tag_tr in tag_table.findChildren("tr", recursive=True):
                 tag_tds = tag_tr.findChildren("td")
                 td0_text = tag_tds[0].text.strip().lower()
