@@ -16,10 +16,10 @@ class Engine(ABC):
     with Metronet IESS cloud platform.
     """
 
-    def __init__(self, zipcode: int):
+    def __init__(self, zipcode: Optional[int]) -> None:
         """Init for data."""
         self.lookup: Dict[str, List[Any]] = {}
-        self.zipcode: int = zipcode
+        self.zipcode: Optional[int] = zipcode
         self.providers: List[Any] = []
         self.provider: Optional[int] = None
         self.requires_provider: bool = True
@@ -37,14 +37,14 @@ class Engine(ABC):
         return None
 
     @abstractmethod
-    async def load_channels(self, session: ClientSession):
+    async def load_channels(self, session: ClientSession) -> None:
         """Load channels from selected provider."""
 
     @abstractmethod
-    async def load_providers(self, session: ClientSession):
+    async def load_providers(self, session: ClientSession) -> None:
         """Load Provider list."""
 
-    def add_channel_mapping(self, name, is_hd, lcn):
+    def add_channel_mapping(self, name: str, is_hd: bool, lcn: int) -> None:
         """Add a new Mapping to the lookup list.
 
         name: the name of the channel

@@ -1,4 +1,7 @@
 """The TV Channel Engine Italy module."""
+from typing import Optional
+
+from aiohttp import ClientSession
 from bs4 import BeautifulSoup
 
 from ..engine import Engine
@@ -7,19 +10,19 @@ from ..engine import Engine
 class EngineIT(Engine):
     """The Channel Engine class for Italy."""
 
-    def __init__(self, zipcode=None):
+    def __init__(self, zipcode: Optional[int] = None) -> None:
         """Init for data."""
         super().__init__(zipcode)
         self.requires_provider = False
 
-    async def load_providers(self, session):
+    async def load_providers(self, session: ClientSession) -> None:
         """No provider defined."""
 
-    def normalize_channel_name(self, channel):
+    def normalize_channel_name(self, channel: str) -> str:
         """Normalize channel name."""
         return channel.strip().replace(" ", "").lower()
 
-    async def load_channels(self, session):
+    async def load_channels(self, session: ClientSession) -> None:
         """Load channels."""
         text = await Engine.get_response("https://www.dtti.it/lcn", session)
         if text:
@@ -29,10 +32,10 @@ class EngineIT(Engine):
         for tag_div in soup.find_all("div", {"class": "content-inner"}):
             for tag_ul in tag_div.findChildren("ul", recursive=True):
                 for tag_li in tag_ul.findChildren("li"):
-                    text = tag_li.get_text().split(":")
-                    if len(text) == 2 and text[0].isdigit():
-                        lcn = int(text[0])
-                        name = text[1]
+                    elem = tag_li.get_text().split(":")
+                    if len(elem) == 2 and elem[0].isdigit():
+                        lcn = int(elem[0])
+                        name = elem[1]
                         if "(" in name:
                             name = name[: name.find("(")]
                         name = self.normalize_channel_name(name)
