@@ -26,6 +26,7 @@ class EngineFI(Engine):
     def __init__(self, zipcode: Optional[int] = None) -> None:
         """Init for data."""
         super().__init__(zipcode)
+        self.provider: Optional[str] = None
 
     async def load_providers(self, session: ClientSession) -> None:
         """Load providers."""

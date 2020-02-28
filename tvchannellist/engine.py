@@ -21,7 +21,7 @@ class Engine(ABC):
         self.lookup: Dict[str, List[Any]] = {}
         self.zipcode: Optional[int] = zipcode
         self.providers: List[Any] = []
-        self.provider: Optional[int] = None
+        self.provider: Optional[Any] = None
         self.requires_provider: bool = True
         super().__init__()
 

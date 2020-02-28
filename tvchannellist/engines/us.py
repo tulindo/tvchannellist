@@ -2,6 +2,10 @@
 import json
 import re
 
+from typing import Optional, List
+
+from aiohttp import ClientSession
+
 from ..engine import Engine
 
 
@@ -18,12 +22,12 @@ async def _load_response(url, session):
 class EngineUS(Engine):
     """The Channel Engine class for United States."""
 
-    def __init__(self, zipcode):
+    def __init__(self, zipcode: Optional[int] = None) -> None:
         """Init for response."""
         super().__init__(zipcode)
-        self.provider = []
+        self.provider: List[str] = []
 
-    async def load_providers(self, session):
+    async def load_providers(self, session: ClientSession) -> None:
         """Load Provider list."""
         response = await _load_response(
             "https://mobilelistings.tvguide.com/Listingsweb/ws/rest/serviceproviders/zipcode/"
@@ -42,7 +46,7 @@ class EngineUS(Engine):
                         )
                     )
 
-    def normalize_channel_name(self, channel):
+    def normalize_channel_name(self, channel: str) -> str:
         """Normalize channel name."""
         regex = re.compile(r"\(.+?\)")
         channel = regex.sub("", channel).lower()
@@ -54,7 +58,7 @@ class EngineUS(Engine):
         channel = pattern.sub("", channel).strip()
         return channel
 
-    async def load_channels(self, session):
+    async def load_channels(self, session: ClientSession) -> None:
         """Load channels from selected provider."""
         idx = self.provider[0]
         response = await _load_response(

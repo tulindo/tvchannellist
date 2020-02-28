@@ -33,7 +33,6 @@ async def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument(
         "command",
-        default="channels",
         help="""Supported commands:
 * providers       --> Get Provider channel_list
 * channels        --> Get Channel channel_list
@@ -41,9 +40,9 @@ async def main():
 """,
     )
     parser.add_argument("--debug", default=False, help="Enable debug")
-    parser.add_argument("--country", default="fi", help="Selected Country")
+    parser.add_argument("--country", help="Selected Country")
     parser.add_argument("--zipcode", help="Selected ZipCode")
-    parser.add_argument("--provider", default="0", help="Selected Provider ID")
+    parser.add_argument("--provider", help="Selected Provider ID")
     parser.add_argument("--override", help="Channel override option (name:lcn)")
     args = parser.parse_args()
 
